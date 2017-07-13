@@ -22,26 +22,41 @@ public class ClientDaoSingleton {
     Status addNewUser(String login, String password) {
 //        DataSource ds = DataSourceFactory.getPostgreDataSource();
         Connection c = null;
-        Statement stmt = null;
+        PreparedStatement selectUsersStmt = null;
+        PreparedStatement insertUserStmt = null;
+//        Statement stmt = null;
         ResultSet rs = null;
+        String selectUsers = "SELECT * FROM users;";
+        String insertUser = "INSERT INTO users (telephone, pwd) VALUES ( ? , ? );";
         try {
             c = ds.getConnection();
-            stmt = c.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM users;");
+            c.setAutoCommit(false);
+            selectUsersStmt = c.prepareStatement(selectUsers);
+            rs = selectUsersStmt.executeQuery();
+            c.commit();
+//            stmt = c.createStatement();
+//            rs = stmt.executeQuery("SELECT * FROM users;");
             while (rs.next()) {
                 String currLogin = rs.getString("telephone");
                 if (currLogin.equals(login)) {
                     return Status.EXISTS;
                 }
             }
-            stmt = c.createStatement();
-            stmt.execute("INSERT INTO users (telephone, pwd) VALUES ( '" + login + "', '" + password + "');");
+            insertUserStmt = c.prepareStatement(insertUser);
+            insertUserStmt.setString(1, login);
+            insertUserStmt.setString(2, password);
+            insertUserStmt.executeUpdate();
+            c.commit();
+//            stmt = c.createStatement();
+//            stmt.execute("INSERT INTO users (telephone, pwd) VALUES ( '" + login + "', '" + password + "');");
         } catch (Exception e) {
             return Status.OTHER;
         } finally {
             try {
                 if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
+//                if (stmt != null) stmt.close();
+                if (selectUsersStmt != null) selectUsersStmt.close();
+                if (insertUserStmt != null) insertUserStmt.close();
                 if (c != null) c.close();
             } catch (SQLException e) {
                 return Status.OTHER;
@@ -82,13 +97,21 @@ public class ClientDaoSingleton {
     Response getUserBalance(String login, String password) {
 //        DataSource ds = DataSourceFactory.getPostgreDataSource();
         Connection c = null;
-        Statement stmt = null;
+//        Statement stmt = null;
         ResultSet rs = null;
+        PreparedStatement selectUsersStmt = null;
+        PreparedStatement selectBalanceStmt = null;
+        String selectUsers = "SELECT * FROM users;";
+        String selectBalance = "SELECT balance FROM user_balance WHERE telephone = ? ;";
         double bal;
         try {
             c = ds.getConnection();
-            stmt = c.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM users;");
+            c.setAutoCommit(false);
+            selectUsersStmt = c.prepareStatement(selectUsers);
+            rs = selectUsersStmt.executeQuery();
+            c.commit();
+//            stmt = c.createStatement();
+//            rs = stmt.executeQuery("SELECT * FROM users;");
             boolean isUserExists = false;
             boolean isRightPassword = false;
             while (rs.next()) {
@@ -108,7 +131,11 @@ public class ClientDaoSingleton {
             if (!isRightPassword) {
                 return new Response(Status.WRONG_PASSWORD);
             }
-            rs = stmt.executeQuery("SELECT balance FROM user_balance WHERE telephone='" + login + "';");
+//            rs = stmt.executeQuery("SELECT balance FROM user_balance WHERE telephone='" + login + "';");
+            selectBalanceStmt = c.prepareStatement(selectBalance);
+            selectBalanceStmt.setString(1, login);
+            rs = selectBalanceStmt.executeQuery();
+            c.commit();
             if (rs.next()) {
                 bal = rs.getDouble("balance");
             }
@@ -122,7 +149,9 @@ public class ClientDaoSingleton {
         finally {
             try {
                 if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
+//                if (stmt != null) stmt.close();
+                if (selectUsersStmt != null) selectUsersStmt.close();
+                if (selectBalanceStmt != null) selectBalanceStmt.close();
                 if (c != null) c.close();
             }
             catch (SQLException e) {
