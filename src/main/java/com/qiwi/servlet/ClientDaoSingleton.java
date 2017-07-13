@@ -14,11 +14,13 @@ public class ClientDaoSingleton {
         return ourInstance;
     }
 
+    public DataSource ds = DataSourceFactory.getPostgreDataSource();
+
     private ClientDaoSingleton() {
     }
 
     Status addNewUser(String login, String password) {
-        DataSource ds = DataSourceFactory.getPostgreDataSource();
+//        DataSource ds = DataSourceFactory.getPostgreDataSource();
         Connection c = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -78,7 +80,7 @@ public class ClientDaoSingleton {
 //    }
 
     Response getUserBalance(String login, String password) {
-        DataSource ds = DataSourceFactory.getPostgreDataSource();
+//        DataSource ds = DataSourceFactory.getPostgreDataSource();
         Connection c = null;
         Statement stmt = null;
         ResultSet rs = null;
