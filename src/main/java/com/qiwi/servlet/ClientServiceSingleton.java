@@ -33,7 +33,7 @@ public class ClientServiceSingleton {
         return false;
     }
 
-    Status registerNewAgent(AgentRequest agentRequest) {//String login, String password) {
+    Status registerNewAgent(AgentRequest agentRequest) {
         String login = agentRequest.getLogin();
         if (!isLoginExists(login) || !isRightLogin(login)) {
             return Status.WRONG_FORMAT;
@@ -44,10 +44,10 @@ public class ClientServiceSingleton {
             return Status.BAD_PASSWORD;
         }
 
-        return ClientDaoSingleton.getInstance().addNewUser(agentRequest);// login, password);
+        return ClientDaoSingleton.getInstance().addNewUser(agentRequest);
     }
 
-    Response getBalance(AgentRequest agentRequest) { //String login, String password) {
+    Response getBalance(AgentRequest agentRequest) {
         String login = agentRequest.getLogin();
         if (!isLoginExists(login) || !isRightLogin(login)) {
             return new Response(Status.WRONG_FORMAT);
@@ -58,6 +58,6 @@ public class ClientServiceSingleton {
             return new Response(Status.BAD_PASSWORD);
         }
 
-        return ClientDaoSingleton.getInstance().getUserBalance(agentRequest); //login, password);
+        return ClientDaoSingleton.getInstance().getUserBalance(agentRequest);
     }
 }
