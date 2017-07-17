@@ -7,8 +7,8 @@ import java.math.RoundingMode;
  * Created by etrofimov on 12.07.17.
  */
 public class Response {
-    public Status code;
-    public BigDecimal balance;
+    private Status code;
+    private BigDecimal balance;
 
     public Response(Status code) {
         this.code = code;
@@ -18,5 +18,13 @@ public class Response {
     public Response(Status code, BigDecimal balance) {
         this.code = code;
         this.balance = balance.setScale(2, RoundingMode.CEILING);
+    }
+
+    public Status getCode() {
+        return this.code;
+    }
+
+    public BigDecimal getBalance() {
+        return this.balance;
     }
 }

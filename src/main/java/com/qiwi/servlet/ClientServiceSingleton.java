@@ -23,12 +23,22 @@ public class ClientServiceSingleton {
         return true;
     }
 
+    static boolean isLoginExists(String login) {
+        if (login != null) return true;
+        return false;
+    }
+
+    static boolean isPasswordExists(String password) {
+        if (password != null) return true;
+        return false;
+    }
+
     Status registerNewAgent(String login, String password) {
-        if (!isRightLogin(login)) {
+        if (!isLoginExists(login) || !isRightLogin(login)) {
             return Status.WRONG_FORMAT;
         }
 
-        if ((password.length() < 8) || (password.length() > 20)) {
+        if (!isPasswordExists(password) || (password.length() < 8) || (password.length() > 20)) {
             return Status.BAD_PASSWORD;
         }
 
@@ -36,8 +46,12 @@ public class ClientServiceSingleton {
     }
 
     Response getBalance(String login, String password) {
-        if (!isRightLogin(login)) {
+        if (!isLoginExists(login) || !isRightLogin(login)) {
             return new Response(Status.WRONG_FORMAT);
+        }
+
+        if (!isPasswordExists(password)) {
+            return new Response(Status.BAD_PASSWORD);
         }
 
         return ClientDaoSingleton.getInstance().getUserBalance(login, password);
