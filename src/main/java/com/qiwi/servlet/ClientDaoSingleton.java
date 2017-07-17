@@ -19,7 +19,8 @@ public class ClientDaoSingleton {
     private ClientDaoSingleton() {
     }
 
-    Status addNewUser(String login, String password) {
+    Status addNewUser(AgentRequest agentRequest) {//String login, String password) {
+        String login = agentRequest.getLogin();
         Connection c = null;
         PreparedStatement selectUsersStmt = null;
         PreparedStatement insertUserStmt = null;
@@ -43,7 +44,7 @@ public class ClientDaoSingleton {
             }
             insertUserStmt = c.prepareStatement(insertUser);
             insertUserStmt.setString(1, login);
-            insertUserStmt.setString(2, password);
+            insertUserStmt.setString(2, agentRequest.getHashCode());
             insertUserStmt.executeUpdate();
             c.commit();
             insertBalanceStmt = c.prepareStatement(insertBalance);
@@ -67,7 +68,8 @@ public class ClientDaoSingleton {
     }
 
 
-    Response getUserBalance(String login, String password) {
+    Response getUserBalance(AgentRequest agentRequest) { // String login, String password) {
+        String login = agentRequest.getLogin();
         Connection c = null;
         ResultSet rs = null;
         PreparedStatement selectUsersStmt = null;
@@ -89,7 +91,7 @@ public class ClientDaoSingleton {
                 if (currLogin.equals(login)) {
                     isUserExists = true;
                     String currPassword = rs.getString("pwd");
-                    if (currPassword.equals(password)) {
+                    if (currPassword.equals(agentRequest.getHashCode())) {
                         isRightPassword = true;
                         break;
                     }

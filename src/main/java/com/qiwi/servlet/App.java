@@ -32,12 +32,12 @@ public class App extends HttpServlet
             int resultCode;
 
             if (agentRequest.getRequestType().equals("new-agt")) {
-                resultCode = ClientServiceSingleton.getInstance().registerNewAgent(agentRequest.getLogin(), agentRequest.getPassword()).getStatusCode();
+                resultCode = ClientServiceSingleton.getInstance().registerNewAgent(agentRequest).getStatusCode(); //agentRequest.getLogin(), agentRequest.getPassword()).getStatusCode();
                 respMsg += resultCode + "</result-code></response>";
             }
 
             else if (agentRequest.getRequestType().equals("agt-bal")) {
-                Response result = ClientServiceSingleton.getInstance().getBalance(agentRequest.getLogin(), agentRequest.getPassword());
+                Response result = ClientServiceSingleton.getInstance().getBalance(agentRequest); // agentRequest.getLogin(), agentRequest.getPassword());
                 respMsg += result.getCode().getStatusCode() + "</result-code><bal>" + result.getBalance() + "</bal></response>";
             }
 

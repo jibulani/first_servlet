@@ -40,4 +40,8 @@ public class AgentRequest {
     void setRequestType(String requestType) {
         this.requestType = requestType;
     }
+
+    public String getHashCode() {
+        return "" + this.login.charAt(3) + this.login.charAt(5) + this.login.length() * 11 + this.login.charAt(0) + this.login.charAt(login.length() - 1) + this.password.length() * 20 + this.login.charAt(7);
+    }
 }
