@@ -44,7 +44,7 @@ public class ClientDaoSingleton {
             }
             insertUserStmt = c.prepareStatement(insertUser);
             insertUserStmt.setString(1, login);
-            insertUserStmt.setString(2, agentRequest.getHashCode());
+            insertUserStmt.setString(2, HashCodeGenerator.getHashCode(agentRequest));
             insertUserStmt.executeUpdate();
             c.commit();
             insertBalanceStmt = c.prepareStatement(insertBalance);
@@ -91,7 +91,7 @@ public class ClientDaoSingleton {
                 if (currLogin.equals(login)) {
                     isUserExists = true;
                     String currPassword = rs.getString("pwd");
-                    if (currPassword.equals(agentRequest.getHashCode())) {
+                    if (currPassword.equals(HashCodeGenerator.getHashCode(agentRequest))) {
                         isRightPassword = true;
                         break;
                     }
