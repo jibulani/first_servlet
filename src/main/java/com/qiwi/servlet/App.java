@@ -16,7 +16,6 @@ public class App extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        DataSourceFactory.getPostgreDataSource();
 
         String respMsg = "<?xml version=\"1.0\" encoding=\"utf-8\"?><response><result-code>";
 
