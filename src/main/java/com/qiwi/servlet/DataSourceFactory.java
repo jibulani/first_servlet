@@ -11,13 +11,23 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 public class DataSourceFactory {
 
-    public static DataSource getPostgreDataSource() {
-        GenericObjectPool connectionPool = new GenericObjectPool(null);
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory("jdbc:postgresql://localhost:5432/etrofimov", "etrofimov", "1234");
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
-        PoolingDriver driver = new PoolingDriver();
-        driver.registerPool("newPool", connectionPool);
-        PoolingDataSource ds = new PoolingDataSource(connectionPool);
-        return ds;
+    private static BasicDataSource dataSource;
+
+    public static BasicDataSource getPostgreDataSource() {
+
+        if (dataSource == null) {
+            BasicDataSource ds = new BasicDataSource();
+            ds.setUrl("jdbc:postgresql://localhost:5432/etrofimov");
+            ds.setUsername("etrofimov");
+            ds.setPassword("1234");
+
+            ds.setMinIdle(5);
+            ds.setMaxIdle(10);
+            ds.setMaxOpenPreparedStatements(100);
+
+            dataSource = ds;
+        }
+
+        return dataSource;
     }
 }

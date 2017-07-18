@@ -6,19 +6,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-public class App extends HttpServlet
-{
+public class App extends HttpServlet {
 
-    private String responseTemplate =
-            "<html>\n" +
-                    "<body>\n" +
-                    "<h2>Hello from Simple Servlet</h2>\n" +
-                    "</body>\n" +
-                    "</html>";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        this.process(request, response);
+        response.setStatus(405);
     }
 
     @Override
@@ -49,14 +42,12 @@ public class App extends HttpServlet
             response.setStatus(200);
             response.getWriter().write(respMsg);
             e.printStackTrace();
-            return;
         }
     }
 
 
     private void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(200);
-        response.getWriter().write(responseTemplate);
     }
 
 }

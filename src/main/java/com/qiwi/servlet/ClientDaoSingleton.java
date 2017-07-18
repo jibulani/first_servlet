@@ -21,32 +21,34 @@ public class ClientDaoSingleton {
 
     Status addNewUser(AgentRequest agentRequest) {
         String login = agentRequest.getLogin();
-        String selectUsers = "SELECT * FROM users;";
+        String selectUsers = "SELECT * FROM users WHERE telephone = ?;";
         String insertUser = "INSERT INTO users (telephone, pwd) VALUES ( ? , ? );";
         String insertBalance = "INSERT INTO user_balance (telephone, balance) VALUES ( ?, 0 );";
         try (
                 Connection c = ds.getConnection();
-                PreparedStatement selectUsersStmt = c.prepareStatement(selectUsers);
-                PreparedStatement insertUserStmt = c.prepareStatement(insertUser);
-                PreparedStatement insertBalanceStmt = c.prepareStatement(insertBalance)
         ) {
 
             c.setAutoCommit(false);
-            ResultSet rs = selectUsersStmt.executeQuery();
-            c.commit();
-            while (rs.next()) {
-                String currLogin = rs.getString("telephone");
-                if (currLogin.equals(login)) {
-                    return Status.EXISTS;
-                }
+            try (
+                    PreparedStatement selectUsersStmt = c.prepareStatement(selectUsers);
+                    PreparedStatement insertUserStmt = c.prepareStatement(insertUser);
+                    PreparedStatement insertBalanceStmt = c.prepareStatement(insertBalance)
+            ) {
+                selectUsersStmt.setString(1, login);
+                ResultSet rs = selectUsersStmt.executeQuery();
+                if (rs.next()) return Status.EXISTS;
+                insertUserStmt.setString(1, login);
+                insertUserStmt.setString(2, HashCodeGenerator.getHashCode(agentRequest.getPassword()));
+                insertUserStmt.executeUpdate();
+                insertBalanceStmt.setString(1, login);
+                insertBalanceStmt.executeUpdate();
             }
-            insertUserStmt.setString(1, login);
-            insertUserStmt.setString(2, HashCodeGenerator.getHashCode(agentRequest));
-            insertUserStmt.executeUpdate();
+            catch (SQLException e) {
+                c.rollback();
+                return Status.OTHER;
+            }
             c.commit();
-            insertBalanceStmt.setString(1, login);
-            insertBalanceStmt.executeUpdate();
-            c.commit();
+            c.setAutoCommit(true);
 
         }
         catch (Exception e) {
@@ -58,45 +60,52 @@ public class ClientDaoSingleton {
 
     Response getUserBalance(AgentRequest agentRequest) {
         String login = agentRequest.getLogin();
-        String selectUsers = "SELECT * FROM users;";
+        String selectUsers = "SELECT * FROM users WHERE telephone = ?;";
         String selectBalance = "SELECT balance FROM user_balance WHERE telephone = ? ;";
         double bal;
         try (
                 Connection c = ds.getConnection();
-                PreparedStatement selectUsersStmt = c.prepareStatement(selectUsers);
-                PreparedStatement selectBalanceStmt = c.prepareStatement(selectBalance)
+
         ){
             c.setAutoCommit(false);
-            ResultSet rs = selectUsersStmt.executeQuery();
-            c.commit();
-            boolean isUserExists = false;
-            boolean isRightPassword = false;
-            while (rs.next()) {
-                String currLogin = rs.getString("telephone");
-                if (currLogin.equals(login)) {
+            try (
+                    PreparedStatement selectUsersStmt = c.prepareStatement(selectUsers);
+                    PreparedStatement selectBalanceStmt = c.prepareStatement(selectBalance)
+            ){
+                selectUsersStmt.setString(1, login);
+                ResultSet rs = selectUsersStmt.executeQuery();
+                boolean isUserExists = false;
+                boolean isRightPassword = false;
+                while (rs.next()) {
                     isUserExists = true;
                     String currPassword = rs.getString("pwd");
-                    if (currPassword.equals(HashCodeGenerator.getHashCode(agentRequest))) {
+                    if (currPassword.equals(HashCodeGenerator.getHashCode(agentRequest.getPassword()))) {
                         isRightPassword = true;
                         break;
                     }
                 }
+                if (!isUserExists) {
+                    return new Response(Status.NOT_EXISTS);
+                }
+                if (!isRightPassword) {
+                    return new Response(Status.WRONG_PASSWORD);
+                }
+                selectBalanceStmt.setString(1, login);
+                rs = selectBalanceStmt.executeQuery();
+                if (rs.next()) {
+                    bal = rs.getDouble("balance");
+                }
+                else {
+                    return new Response(Status.NOT_FOUND);
+                }
+            } catch (SQLException e) {
+                c.rollback();
+                return new Response(Status.OTHER);
             }
-            if (!isUserExists) {
-                return new Response(Status.NOT_EXISTS);
-            }
-            if (!isRightPassword) {
-                return new Response(Status.WRONG_PASSWORD);
-            }
-            selectBalanceStmt.setString(1, login);
-            rs = selectBalanceStmt.executeQuery();
+
             c.commit();
-            if (rs.next()) {
-                bal = rs.getDouble("balance");
-            }
-            else {
-                return new Response(Status.NOT_FOUND);
-            }
+            c.setAutoCommit(true);
+
         }
         catch (Exception e) {
             e.printStackTrace();
